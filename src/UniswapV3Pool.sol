@@ -4,6 +4,7 @@ pragma solidity ^0.8.14;
 import {Tick} from "./lib/Tick.sol";
 import {Position} from "./lib/Position.sol";
 import {IUniswapV3MintCallback} from "./interfaces/IUniswapV3MintCallback.sol";
+import {IUniswapV3SwapCallback} from "./interfaces/IUniswapV3SwapCallback.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
 
 contract UniswapV3Pool {
@@ -89,6 +90,25 @@ contract UniswapV3Pool {
         }
 
         emit Mint(msg.sender, owner, lowerTick, upperTick, amount, amount0, amount1);
+    }
+
+    function swap(address recipient) public returns (int256 amount0, int256 amount1) {
+        int24 nextTick = 85184;
+        uint160 nextPrice = 5604469350942327889444743441197;
+
+        amount0 = -0.008396714242162444 ether;
+        amount1 = 42 ether;
+        (slot0.tick, slot0.sqrtPriceX96) = (nextTick, nextPrice);
+
+        IERC20(token0).transfer(recipient, uint256(-amount0));
+
+        uint256 balance1Before = balance1();
+        IUniswapV3SwapCallback(msg.sender).uniswapV3SwapCallback(amount0, amount1);
+        if (balance1Before + uint256(amount1) < balance1()) {
+            revert InsufficientInputAmount();
+        }
+
+        emit Swap(msg.sender, recipient, amount0, amount1, slot0.sqrtPriceX96, liquidity, slot0.tick);
     }
 
     function balance0() internal returns (uint256 balance) {
