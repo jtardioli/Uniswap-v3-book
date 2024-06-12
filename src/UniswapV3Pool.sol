@@ -74,7 +74,6 @@ contract UniswapV3Pool {
 
         amount0 = 0.99897661834742528 ether;
         amount1 = 5000 ether;
-        //test
 
         liquidity += uint128(amount);
 
